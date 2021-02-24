@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+function cleanup() {
+  echo "shutting down wg0"
+  wg-quick down wg0
+}
+
+trap cleanup EXIT
+
+#echo "1" > /proc/sys/net/ipv4/ip_forward
+wg-quick up wg0
+
+sleep infinity
+
