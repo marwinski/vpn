@@ -1,0 +1,10 @@
+apiVersion: crd.projectcalico.org/v1
+kind: IPPool
+metadata:
+  name: my-ippool-1
+spec:
+  cidr: 192.168.17.1/24
+  disabled: false
+  ipipMode: Always
+  natOutgoing: false
+  nodeSelector: ""
