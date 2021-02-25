@@ -37,7 +37,7 @@ Address = 192.168.17.2/24
 PrivateKey = ${SHOOTKEY}
 
 [Peer]
-PublicKey = ${SHOOTPUB}
+PublicKey = ${SEEDPUB}
 PresharedKey = ${PSK}
 AllowedIPs = 192.168.17.1/32
 Endpoint = TBD

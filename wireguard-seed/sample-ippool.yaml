@@ -1,0 +1,36 @@
+apiVersion: crd.projectcalico.org/v1
+kind: IPPool
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"crd.projectcalico.org/v1","kind":"IPPool","metadata":{"annotations":{},"name":"my-ippool-1"},"spec":{"cidr":"192.168.17.10/24","disabled":false,"ipipMode":"Always","natOutgoing":false,"nodeSelector":""}}
+  creationTimestamp: "2021-01-15T14:11:53Z"
+  generation: 2
+  managedFields:
+  - apiVersion: crd.projectcalico.org/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+      f:spec:
+        .: {}
+        f:cidr: {}
+        f:disabled: {}
+        f:ipipMode: {}
+        f:natOutgoing: {}
+        f:nodeSelector: {}
+    manager: kubectl-client-side-apply
+    operation: Update
+    time: "2021-01-15T14:14:02Z"
+  name: my-ippool-1
+  resourceVersion: "2360862"
+  selfLink: /apis/crd.projectcalico.org/v1/ippools/my-ippool-1
+  uid: 958e8b51-63d0-43c4-afd4-c8490fd01020
+spec:
+  cidr: 192.168.17.10/24
+  disabled: false
+  ipipMode: Always
+  natOutgoing: false
+  nodeSelector: ""

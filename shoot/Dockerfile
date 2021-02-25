@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM alpine:3.10.3
+#FROM alpine:3.10.3
+FROM eu.gcr.io/gardenlinux/gardenlinux:184.0
 
-RUN apk add --update bash curl openvpn iptables bc && \
-    rm -rf /var/cache/apk/*
+RUN apt-get update && apt-get install -y curl openvpn iptables bc wireguard-tools 
 
 ADD shoot/network-connection.sh shoot/openvpn.config.template /
 

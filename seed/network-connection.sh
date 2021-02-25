@@ -44,6 +44,11 @@ function get_host() {
 }
 
 function identify_endpoint() {
+
+  if [ -n "$ENDPOINT" ] ; then
+    return
+  fi
+
   log "trying to identify the endpoint (load balancer name of $service_name service) myself..."
 
   curl_auth_flags=""
