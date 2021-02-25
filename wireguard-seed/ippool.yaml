@@ -3,8 +3,8 @@ kind: IPPool
 metadata:
   name: my-ippool-1
 spec:
-  cidr: 192.168.17.1/24
-  disabled: false
+  cidr: 192.168.17.0/24
   ipipMode: Always
   natOutgoing: false
-  nodeSelector: ""
+  disabled: true
+  nodeSelector: !all()
