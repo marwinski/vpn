@@ -20,6 +20,14 @@ function log() {
 
 trap 'exit' TERM SIGINT
 
+proto=tcp4-server
+
+# test whether we are supposed to open a Wireguard tunnel to the seed
+if [ -f /etc/wireguard/wg0.conf ] ; then
+    wg-quick up wg0
+    #proto=udp
+fi
+
 # for each cidr config, it looks first at its env var, then a local file (which may be a volume mount), then the default
 baseConfigDir="/init-config"
 fileServiceNetwork=
@@ -74,6 +82,7 @@ sed -e "s/\${SERVICE_NETWORK_ADDRESS}/${service_network_address}/" \
     -e "s/\${SERVICE_NETWORK_NETMASK}/${service_network_netmask}/" \
     -e "s/\${POD_NETWORK_ADDRESS}/${pod_network_address}/" \
     -e "s/\${POD_NETWORK_NETMASK}/${pod_network_netmask}/" \
+    -e "s/\${PROTO}/${proto}/" \
     openvpn.config.template > openvpn.config
 
 if [[ ! -z "$node_network" ]]; then

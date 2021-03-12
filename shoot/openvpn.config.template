@@ -14,7 +14,7 @@
 
 mode server
 tls-server
-proto tcp4-server
+proto ${PROTO}
 dev tun0
 
 # Additonal optimizations
