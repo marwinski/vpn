@@ -24,14 +24,24 @@ PATH                   := $(GOBIN):$(PATH)
 
 export PATH
 
+.PHONY: revendor
+revendor:
+	@GO111MODULE=on go mod vendor -v 
+	@GO111MODULE=on go mod tidy
+
 .PHONY: seed-docker-image
 seed-docker-image:
 	@docker build -t $(SEED_IMAGE_REPOSITORY):$(SEED_IMAGE_TAG) -f seed/Dockerfile --rm .
 
+TAG := 0.6
+
 .PHONY: shoot-docker-image
 shoot-docker-image:
-	@docker build -t $(SHOOT_IMAGE_REPOSITORY):$(SHOOT_IMAGE_TAG) -f shoot/Dockerfile --rm .
+	#@docker build -t $(SHOOT_IMAGE_REPOSITORY):$(SHOOT_IMAGE_TAG) -f shoot/Dockerfile --rm .
+	docker build -t eu.gcr.io/gardener-project/test/vpn-shoot-dev:$(TAG)  -f shoot/Dockerfile --rm .
 
+upload:
+	docker push eu.gcr.io/gardener-project/test/vpn-shoot-dev:$(TAG)
 
 .PHONY: docker-images
 docker-images: seed-docker-image shoot-docker-image
@@ -42,6 +52,12 @@ release: docker-images docker-login docker-push
 .PHONY: docker-login
 docker-login:
 	@gcloud auth activate-service-account --key-file .kube-secrets/gcr/gcr-readwrite.json
+
+.PHONY: readvertiser
+readvertiser:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o readvertiser \
+		-mod=vendor \
+		./cmd/readvertiser/main.go
 
 .PHONY: docker-push
 docker-push:
