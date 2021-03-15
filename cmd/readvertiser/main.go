@@ -65,7 +65,8 @@ func updateIP(wireguardDevice string, peerKey wgtypes.Key, newIP net.IP) error {
 	config := wgtypes.Config{
 		PrivateKey:   &dev.PrivateKey,
 		FirewallMark: &dev.FirewallMark,
-		ReplacePeers: true,
+		ReplacePeers: false,
+		ListenPort:   &dev.ListenPort,
 	}
 	var peerConfigs []wgtypes.PeerConfig
 
@@ -88,6 +89,7 @@ func updateIP(wireguardDevice string, peerKey wgtypes.Key, newIP net.IP) error {
 		peerConfigs = append(peerConfigs, pc)
 	}
 	config.Peers = peerConfigs
+	fmt.Printf("%+v", config)
 	return client.ConfigureDevice(dev.Name, config)
 }
 
@@ -102,15 +104,20 @@ func isInList(list []net.IP, ip net.IP) bool {
 
 func main() {
 	klog.InitFlags(nil)
-	wireguardDevice := flag.String("wireguardDevice", "", "wireguard device")
-	peerPublicKey := flag.String("peer", "", "peer public key")
+	wireguardDevice := flag.String("wireguard-device", "", "wireguard device")
+	peerPublicKey := flag.String("peer-public-key", "", "peer public key")
 	dnsName := flag.String("dns-name", "", "dns name")
 	refreshTime := flag.Int("refresh-time", 60, "time in seconds between IP address checks")
 	flag.Parse()
 
+	if *wireguardDevice == "" || *peerPublicKey == "" || *dnsName == "" {
+		fmt.Fprintln(os.Stderr, "Must specify --wireguard-device, --peer-public-key, and dns-name")
+		os.Exit(1)
+	}
+
 	pk, err := base64.StdEncoding.DecodeString(*peerPublicKey)
 	if err != nil || len(pk) != wgtypes.KeyLen {
-		fmt.Errorf("Unable to decode peer string or key length not %d bytes: %v", len(pk), err)
+		fmt.Printf("Unable to decode peer string or key length not %d bytes: %v", len(pk), err)
 		os.Exit(1)
 	}
 	var peerKey wgtypes.Key
@@ -120,19 +127,19 @@ func main() {
 		time.Sleep(time.Duration(*refreshTime) * time.Second)
 		ips, err := net.LookupIP(*dnsName)
 		if err != nil {
-			klog.Errorf("Unable to look up dns name %s: %v", dnsName, err)
+			klog.Errorf("Unable to look up dns name %s: %v", *dnsName, err)
 			continue
 		}
 		configuredIP, err := readIP(*wireguardDevice, peerKey)
 		if err != nil {
-			klog.Errorf("Unable to obtain ip address from wireguard interface %s, peer %s: %v, wire")
+			klog.Errorf("Unable to obtain ip address from wireguard device %s, peer %s: %v, wire", *wireguardDevice, *peerPublicKey, err)
 			continue
 		}
 		if isInList(ips, configuredIP) {
-			klog.Infof("Correct IP %s configured on wireguard interface %s for peer %s.", configuredIP.String(), *wireguardDevice, *peerPublicKey)
+			klog.Infof("Correct IP %s configured on wireguard device %s for peer %s.", configuredIP.String(), *wireguardDevice, *peerPublicKey)
 			continue
 		}
-		klog.Infof("Updating IP address on wireguard interface.")
+		klog.Infof("Updating IP address on wireguard interface. Configured IP is %s, correct one is %s", configuredIP.String(), ips[0].String())
 
 		err = updateIP(*wireguardDevice, peerKey, ips[0])
 		if err != nil {

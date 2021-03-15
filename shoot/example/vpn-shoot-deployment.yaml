@@ -13,29 +13,61 @@
 # limitations under the License.
 
 ---
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vpn-shoot
-  namespace: kube-system
+  name: vpn-shoot2
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: vpn-shoot
+      app: vpn-shoot2
   template:
     metadata:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
       labels:
-        app: vpn-shoot
+        app: vpn-shoot2
     spec:
       tolerations:
       - effect: NoExecute
         operator: Exists
+      initContainers:
+      - name: vpn-shoot-wireguard-init
+        image: eu.gcr.io/gardener-project/test/vpn-shoot-wireguard:0.6
+        command:
+        - bash
+        args:
+        - -c 
+        - '/usr/bin/wg-quick up wg0'
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+        volumeMounts:
+        - name: wireguard-secret
+          mountPath: /etc/wireguard
       containers:
-      - name: vpn-shoot
-        image: eu.gcr.io/gardener-project/gardener/vpn-shoot:0.9.0
+      - name: readvertiser
+        image: eu.gcr.io/gardener-project/test/vpn-shoot-wireguard:0.6
+        command:
+        - /readvertiser
+        args:
+        - --wireguard-device=wg0
+        - --peer-public-key=/3HpALbgh70t0VAi9kE38PC4D52RQnNzXhFvQQD/En8=
+        - --dns-name=sap.comsap.com
+        - --refresh-time=60
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+      - name: vpn-shoot2
+        command:
+        - sleep
+        - "99999"
+        image: eu.gcr.io/gardener-project/test/vpn-shoot-dev:0.2
         imagePullPolicy: IfNotPresent
         securityContext:
           privileged: true
@@ -60,3 +92,7 @@ spec:
         secret:
           defaultMode: 0400
           secretName: vpn-keys
+      - name: wireguard-secret
+        secret:
+          defaultMode: 0400
+          secretName: wireguard-secret

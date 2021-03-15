@@ -25,7 +25,7 @@ proto=tcp4-server
 # test whether we are supposed to open a Wireguard tunnel to the seed
 if [ -f /etc/wireguard/wg0.conf ] ; then
     wg-quick up wg0
-    #proto=udp
+    proto=udp
 fi
 
 # for each cidr config, it looks first at its env var, then a local file (which may be a volume mount), then the default
