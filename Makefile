@@ -40,7 +40,7 @@ readvertiser:
 seed-docker-image:
 	@docker build -t $(SEED_IMAGE_REPOSITORY):$(SEED_IMAGE_TAG) -f seed/Dockerfile --rm .
 
-TAG := 0.6
+TAG := 0.7
 
 .PHONY: shoot-docker-image
 shoot-docker-image:
@@ -53,6 +53,7 @@ shoot-wireguard-image: readvertiser
 
 upload:
 	docker push eu.gcr.io/gardener-project/test/vpn-shoot-dev:$(TAG)
+	docker push eu.gcr.io/gardener-project/test/vpn-shoot-wireguard:$(TAG)
 
 .PHONY: docker-images
 docker-images: seed-docker-image shoot-docker-image shoot-wireguard-image
