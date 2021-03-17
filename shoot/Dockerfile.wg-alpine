@@ -1,0 +1,33 @@
+# Copyright (c) 2018 SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# wireguard-tools
+FROM alpine:3.13.2 as builder
+RUN apk update && apk add alpine-sdk linux-headers && \
+    git clone git://git.zx2c4.com/wireguard-tools && cd  /wireguard-tools/src && make
+
+# userspace wireguard daemon
+FROM golang:1.16.2-alpine3.13 as gobuilder
+RUN apk update && apk add git make && \
+    cd / && git clone git://git.zx2c4.com/wireguard-go && \
+    cd wireguard-go && git checkout tags/0.0.20210212 -b rel && make
+
+FROM alpine:3.13.2
+#FROM eu.gcr.io/gardenlinux/gardenlinux:184.0
+
+COPY --from=builder /wireguard-tools/src/wg /usr/bin
+COPY --from=builder /wireguard-tools/src/wg-quick/linux.bash /usr/bin/wg-quick
+COPY --from=gobuilder /wireguard-go/wireguard-go /usr/bin
+RUN apk add --no-cache iptables openvpn
+ADD readvertiser /
