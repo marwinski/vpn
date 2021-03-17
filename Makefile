@@ -13,13 +13,14 @@
 # limitations under the License.
 
 VERSION                := $(shell cat VERSION)
-REGISTRY               := eu.gcr.io/gardener-project/gardener
+REGISTRY               := eu.gcr.io/gardener-project/test
 PREFIX                 := vpn
 SEED_IMAGE_REPOSITORY  := $(REGISTRY)/$(PREFIX)-seed
 SEED_IMAGE_TAG         := $(VERSION)
 SHOOT_IMAGE_REPOSITORY := $(REGISTRY)/$(PREFIX)-shoot
 SHOOT_IMAGE_TAG        := $(VERSION)
-
+SHOOT_WIREGUARD        := $(REGISTRY)/$(PREFIX)-shoot-wg
+SHOOT_WIREGUARD_TAG    := $(VERSION)
 PATH                   := $(GOBIN):$(PATH)
 
 export PATH
@@ -40,20 +41,19 @@ readvertiser:
 seed-docker-image:
 	@docker build -t $(SEED_IMAGE_REPOSITORY):$(SEED_IMAGE_TAG) -f seed/Dockerfile --rm .
 
-TAG := 0.7
-
 .PHONY: shoot-docker-image
 shoot-docker-image:
-	#@docker build -t $(SHOOT_IMAGE_REPOSITORY):$(SHOOT_IMAGE_TAG) -f shoot/Dockerfile --rm .
-	docker build -t eu.gcr.io/gardener-project/test/vpn-shoot-dev:$(TAG)  -f shoot/Dockerfile --rm .
+	docker build -t $(SHOOT_IMAGE_REPOSITORY):$(SHOOT_IMAGE_TAG) -f shoot/Dockerfile --rm .
 
 .PHONY: shoot-wireguard-image
 shoot-wireguard-image: readvertiser
-	docker build -t eu.gcr.io/gardener-project/test/vpn-shoot-wireguard:$(TAG) -f shoot/Dockerfile.wireguard --rm .
+	docker build -t $(SHOOT_WIREGUARD):$(SHOOT_WIREGUARD_TAG) -f shoot/Dockerfile.wg --rm .
 
+.PHONY: upload
 upload:
-	docker push eu.gcr.io/gardener-project/test/vpn-shoot-dev:$(TAG)
-	docker push eu.gcr.io/gardener-project/test/vpn-shoot-wireguard:$(TAG)
+	docker push $(SEED_IMAGE_REPOSITORY):$(SEED_IMAGE_TAG)
+	docker push $(SHOOT_IMAGE_REPOSITORY):$(SHOOT_IMAGE_TAG)
+	docker push $(SHOOT_WIREGUARD):$(SHOOT_WIREGUARD_TAG)
 
 .PHONY: docker-images
 docker-images: seed-docker-image shoot-docker-image shoot-wireguard-image

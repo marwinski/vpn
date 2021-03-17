@@ -22,12 +22,6 @@ trap 'exit' TERM SIGINT
 
 proto=tcp4-server
 
-# test whether we are supposed to open a Wireguard tunnel to the seed
-if [ -f /etc/wireguard/wg0.conf ] ; then
-    wg-quick up wg0
-    proto=udp
-fi
-
 # for each cidr config, it looks first at its env var, then a local file (which may be a volume mount), then the default
 baseConfigDir="/init-config"
 fileServiceNetwork=
@@ -43,6 +37,11 @@ pod_network="${POD_NETWORK:-${filePodNetwork}}"
 pod_network="${pod_network:-100.96.0.0/11}"
 node_network="${NODE_NETWORK:-${fileNodeNetwork}}"
 node_network="${node_network:-}"
+protocol="${PROTOCOL:-udp}"
+
+if [ ${proto} == "tcp" ]; then
+    proto="tcp-server"
+fi
 
 # calculate netmask for given CIDR (required by openvpn)
 #

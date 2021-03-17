@@ -27,6 +27,11 @@ tcp_keepalive_time="${TCP_KEEPALIVE_TIME:-7200}"
 tcp_keepalive_intvl="${TCP_KEEPALIVE_INTVL:-75}"
 tcp_keepalive_probes="${TCP_KEEPALIVE_PROBES:-9}"
 tcp_retries2="${TCP_RETRIES2:-5}"
+protocol="${PROTOCOL:-udp}"
+
+if [ ${protocol} == "tcp" ]; then
+    protocol="tcp-client"
+fi
 
 APISERVER_AUTH_MODE="${APISERVER_AUTH_MODE:-basic-auth}"
 APISERVER_AUTH_MODE_BASIC_AUTH_CSV="${APISERVER_AUTH_MODE_BASIC_AUTH_CSV:-/srv/auth/basic_auth.csv}"

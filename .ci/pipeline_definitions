@@ -19,6 +19,10 @@ vpn:
             registry: 'gcr-readwrite'
             image: 'eu.gcr.io/gardener-project/gardener/vpn-shoot'
             dockerfile: 'shoot/Dockerfile'
+          vpn-shoot-wg:
+            registry: 'gcr-readwrite'
+            image: 'eu.gcr.io/gardener-project/gardener/vpn-shoot-wg'
+            dockerfile: 'shoot/Dockerfile.wg'
     steps: ~
   jobs:
     head-update:
